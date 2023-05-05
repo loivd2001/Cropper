@@ -3,8 +3,10 @@ import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
 import { createPinia, PiniaVuePlugin } from "pinia";
 
+import 'cropperjs/dist/cropper.css';
+import VueCropper from 'vue-cropperjs';
 import Loading from 'vue-loading-overlay';
-import '../node_modules/vue-loading-overlay/dist/vue-loading.css'
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 
 import "./assets/scss/main.scss";
@@ -13,6 +15,7 @@ import "./assets/scss/main.scss";
 
 Vue.use(PiniaVuePlugin);
 
+Vue.use(VueCropper);
 Vue.use(Loading);
 const pinia = createPinia();
 Vue.config.productionTip = false;
