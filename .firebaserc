@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "stag": "pintogames-stage",
+    "prod": "pintogames-4f64d"
+  }
+}

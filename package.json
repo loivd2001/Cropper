@@ -1,0 +1,77 @@
+{
+  "name": "pintogame-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --mode local",
+    "serve:dev": "vue-cli-service serve --mode development",
+    "serve:stag": "vue-cli-service serve --mode staging",
+    "serve:prod": "vue-cli-service serve --mode production",
+    "build": "vue-cli-service build",
+    "build:dev": "vue-cli-service build --mode development",
+    "build:stag": "vue-cli-service build --mode staging",
+    "build:prod": "vue-cli-service build --mode production",
+    "lint": "vue-cli-service lint",
+    "deploy:stag": "npx firebase use stag && npm run build:stag && npx firebase deploy --only hosting",
+    "deploy:prod": "npx firebase use prod && npm run build:prod && npx firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "core-js": "^3.8.3",
+    "crypto-js": "^4.1.1",
+    "jwt-decode": "^3.1.2",
+    "md5": "^2.3.0",
+    "moment": "^2.29.4",
+    "pinia": "^2.0.17",
+    "v-mask": "^2.3.0",
+    "vue": "^2.7.3",
+    "vue-cropperjs": "^4.2.0",
+    "vue-cryptojs": "^2.3.0",
+    "vue-html2pdf": "^1.8.0",
+    "vue-i18n": "^8.26.3",
+    "vue-loading-overlay": "^3.4.2",
+    "vue-qrcode-component": "^2.1.1",
+    "vue-router": "^3.5.1",
+    "vuedraggable": "^2.24.3",
+    "vuelidate": "^0.7.7",
+    "vuetify": "^2.6.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@fortawesome/fontawesome-free": "^6.1.2",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "css-loader": "^6.7.3",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "sass": "~1.32.0",
+    "sass-loader": "^10.0.0",
+    "style-loader": "^3.3.2",
+    "vue-cli-plugin-vuetify": "^2.5.1",
+    "vue-template-compiler": "^2.6.14",
+    "vuetify-loader": "^1.7.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
