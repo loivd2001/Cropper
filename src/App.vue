@@ -25,6 +25,11 @@
           @input="showDialogFlag = $event"
         />
   </div>
+  <div style="display: flex;"> 
+    <div v-for="(item,i) in listImg" :key="i">
+      <img :src="item.url"/>
+    </div>
+  </div>
 </div>  
 </template>
 
@@ -40,6 +45,7 @@ export default {
       arrayImg: [] ,
       showDialogFlag:false ,
       isFirstLoading: true,
+      listImg:[] ,
     }
   } ,
   methods : {
@@ -50,6 +56,7 @@ export default {
     async onSaveImage(dataList) {
       // TODO
       console.log('debug', dataList);
+      this.listImg = dataList ;
     },
 
     /**
