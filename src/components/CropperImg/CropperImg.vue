@@ -352,16 +352,20 @@ export default {
       let dataList = [];
 
       // Get image info
-      this.arrayImg.forEach(async (item, i) => {
-        const cropInfo = this.cropDataList[i];
+      const imgLength = this.arrayImg.length;
+      for (let i = 0; i < imgLength; i++) {
+        const cropInfo = this.cropDataList[i],
+          item = this.arrayImg[i];
 
         // Get image info
-        let imageInfo = Object.assign({}, item);
+        let imageInfo = Object.assign({}, item),
+          url = imageInfo.url,
+          file = imageInfo.file;
         if (cropInfo) {
           // Check image is cropped for current index or not
-          let url = cropInfo.url,
-            file = cropInfo.file;
-          if (!cropInfo.isCropped) {
+          url = cropInfo.url || url,
+          file = cropInfo.file || file;
+          if (i === this.activeIndex && !cropInfo.isCropped) {
             const cropCanvas = this.getCroppedCanvas();
             if (cropCanvas) {
               // Get crop image
@@ -384,7 +388,7 @@ export default {
         }
 
         dataList.push(imageInfo);
-      });
+      }
 
       // Save image info
       await this.saveFunc(dataList);
@@ -526,8 +530,6 @@ export default {
       return this.$refs.cropper.getCroppedCanvas({
         maxWidth: MAX_SIZE,
         maxHeight: MAX_SIZE,
-        imageSmoothingEnabled: false,
-        imageSmoothingQuality: 'high',
       });
     },
 
@@ -538,7 +540,7 @@ export default {
      */
     async getCropImg(canvas, imgType) {
       return new Promise((resolve) => {
-        canvas.toBlob((blob) => {
+        canvas.toBlob(async (blob) => {
           if (blob) {
             resolve(blob);
           } else {
