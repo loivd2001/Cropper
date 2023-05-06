@@ -415,8 +415,6 @@ export default {
         // Init crop box based on the image
         this.cropDataList[index] = {
           cropData: cropInfo,
-          // In case of no change img, need to get cropped image when saving
-          isCropped: false,
         };
       }
 
@@ -439,6 +437,8 @@ export default {
             ...item,
             canvasInfo: this.$refs.cropper.getCanvasData(),
             rotateInfo: data.rotate,
+            // In case of no change img, need to get cropped image when saving
+            isCropped: false,
           };
         }
 
