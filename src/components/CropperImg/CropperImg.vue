@@ -209,11 +209,7 @@ export default {
         this.saveCropInfo(this.activeIndex);
       }
 
-      if (this.loader && this.loader.isActive) {
-        setTimeout(() => {
-          this.loader.hide()
-        }, 200);
-      }
+      this.hideLoading();
     },
 
     /**
@@ -273,14 +269,11 @@ export default {
      * @param item Img info
      * @param index Index of image list
      */
-    onChangePreviewImage(item, index) {
+    async onChangePreviewImage(item, index) {
       // Check img info
       if (!item || index === this.activeIndex) return;
 
-      this.loader = this.$loading.show({
-        loader: 'dots',
-        container: this.$refs.wrapper_cropper,
-      });
+      this.showLoading();
 
       const existsIndex = this.indexList.includes(this.activeIndex);
       if (this.isChangeCropper || !existsIndex) {
@@ -288,7 +281,7 @@ export default {
           this.indexList.push(this.activeIndex);
         }
         // Get cropped canvas
-        this.saveCropImage(this.activeIndex, index, item);
+        await this.saveCropImage(this.activeIndex, index, item);
       } else {
         // Set current index
         this.activeIndex = index;
@@ -354,19 +347,40 @@ export default {
      * Save image info after adjusting
      */
     async onSaveImage() {
+      this.showLoading();
+
       let dataList = [];
 
       // Get image info
-      this.arrayImg.forEach((item, i) => {
+      this.arrayImg.forEach(async (item, i) => {
         const cropInfo = this.cropDataList[i];
 
         // Get image info
         let imageInfo = Object.assign({}, item);
         if (cropInfo) {
-          if (cropInfo.url) {
-            imageInfo.url = cropInfo.url;
-            imageInfo.file = cropInfo.file;
+          // Check image is cropped for current index or not
+          let url = cropInfo.url,
+            file = cropInfo.file;
+          if (!cropInfo.isCropped) {
+            const cropCanvas = this.getCroppedCanvas();
+            if (cropCanvas) {
+              // Get crop image
+              const blob = await this.getCropImg(cropCanvas, imageInfo.type);
+              if (blob) {
+                const fileInfo = new File([blob], imageInfo.fileName, {
+                  type: imageInfo.type,
+                  lastModified: Date.now(),
+                  size: blob.size,
+                });
+
+                url = cropCanvas.toDataURL(imageInfo.type);
+                file = fileInfo;
+              }
+            }
           }
+
+          imageInfo.url = url;
+          imageInfo.file = file;
         }
 
         dataList.push(imageInfo);
@@ -374,6 +388,9 @@ export default {
 
       // Save image info
       await this.saveFunc(dataList);
+
+      // Hide loading
+      this.hideLoading();
 
       // Close dialog
       this.onCloseDialog();
@@ -398,6 +415,8 @@ export default {
         // Init crop box based on the image
         this.cropDataList[index] = {
           cropData: cropInfo,
+          // In case of no change img, need to get cropped image when saving
+          isCropped: false,
         };
       }
 
@@ -433,46 +452,39 @@ export default {
      * @param newIndex Changed index
      * @param newItem Changed image
      */
-    saveCropImage(currentIndex, newIndex, newItem) {
-      const MAX_SIZE = 1920,
-        cropCanvas = this.$refs.cropper.getCroppedCanvas({
-          maxWidth: MAX_SIZE,
-          maxHeight: MAX_SIZE,
-          imageSmoothingEnabled: false,
-          imageSmoothingQuality: 'high',
-        }),
+    async saveCropImage(currentIndex, newIndex, newItem) {
+      const cropCanvas = this.getCroppedCanvas(),
         imageInfo = this.arrayImg[currentIndex];
       
       // Skip getting crop info
       if (!cropCanvas || !imageInfo) return;
 
       // Get crop image
-      cropCanvas.toBlob(
-        async (blob) => {
-          const fileInfo = new File([blob], imageInfo.fileName, {
-            type: imageInfo.type,
-            lastModified: Date.now(),
-            size: blob.size,
-          });
+      const blob = await this.getCropImg(cropCanvas, imageInfo.type);
+      if (blob) {
+        const fileInfo = new File([blob], imageInfo.fileName, {
+          type: imageInfo.type,
+          lastModified: Date.now(),
+          size: blob.size,
+        });
 
-          // Set crop file info
-          this.cropDataList = this.cropDataList.map((item, i) => {
-            if (i === currentIndex) {
-              item.url = cropCanvas.toDataURL(imageInfo.type);
-              item.file = fileInfo;
-            }
+        // Set crop file info
+        this.cropDataList = this.cropDataList.map((item, i) => {
+          if (i === currentIndex) {
+            item.url = cropCanvas.toDataURL(imageInfo.type);
+            item.file = fileInfo;
+            item.isCropped = true;
+          }
 
-            return item;
-          });
+          return item;
+        });
 
-          // Set current index
-          this.activeIndex = newIndex;
+        // Set current index
+        this.activeIndex = newIndex;
 
-          // Replace img
-          this.replaceImage(newItem.url);
-        },
-        imageInfo.type,
-      );
+        // Replace img
+        this.replaceImage(newItem.url);
+      }
     },
 
     /**
@@ -491,6 +503,48 @@ export default {
       this.loader = this.$loading.show({
         loader: 'dots',
         container: this.$refs.wrapper_cropper,
+      });
+    },
+
+    /**
+     * Hide loading
+     */
+    hideLoading() {
+      if (this.loader && this.loader.isActive) {
+        setTimeout(() => {
+          this.loader.hide()
+        }, 200);
+      }
+    },
+
+    /**
+     * Get cropped canvas
+     */
+    getCroppedCanvas() {
+      const MAX_SIZE = 1920;
+      
+      return this.$refs.cropper.getCroppedCanvas({
+        maxWidth: MAX_SIZE,
+        maxHeight: MAX_SIZE,
+        imageSmoothingEnabled: false,
+        imageSmoothingQuality: 'high',
+      });
+    },
+
+    /**
+     * Get cropped image
+     * @param canvas
+     * @param imgType image/png
+     */
+    async getCropImg(canvas, imgType) {
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            resolve(null);
+          }
+        }, imgType);
       });
     },
   },
